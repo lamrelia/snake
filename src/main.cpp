@@ -23,7 +23,7 @@ public:
 
     void Draw()
     {
-        DrawCircle(position.x * CellSize, position.y * CellSize, CellSize / 2, Red);
+        DrawCircle(position.x * CellSize, position.y * CellSize, CellSize, Red);
     }
 
     Vector2 GenerateRandomPosition()
@@ -52,7 +52,7 @@ public:
 
     void Update()
     {
-        static float delay = 0.2f;
+        static float delay = 0.1f;
         static float elapsedTime = 0.0f;
 
         elapsedTime += GetFrameTime();
@@ -62,6 +62,38 @@ public:
             body.pop_back();
             Vector2 newHead = Vector2Add(body.front(), direction);
             body.push_front(newHead);
+        }
+    }
+
+    void HandleInput()
+    {
+        if (IsKeyDown(KEY_RIGHT))
+        {
+            if (direction.x != -1)
+            {
+                direction = Vector2{1, 0};
+            }
+        }
+        else if (IsKeyDown(KEY_LEFT))
+        {
+            if (direction.x != -1)
+            {
+                direction = Vector2{-1, 0};
+            }
+        }
+        else if (IsKeyDown(KEY_UP))
+        {
+            if (direction.y != -1)
+            {
+                direction = Vector2{0, -1};
+            }
+        }
+        else if (IsKeyDown(KEY_DOWN))
+        {
+            if (direction.y != -1)
+            {
+                direction = Vector2{0, 1};
+            }
         }
     }
 };
@@ -77,6 +109,7 @@ int main()
     while (WindowShouldClose() == false)
     {
         BeginDrawing();
+        snake.HandleInput();
         snake.Update();
         ClearBackground(Black);
         food.Draw();
