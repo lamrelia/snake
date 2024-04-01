@@ -1,10 +1,12 @@
 #include <raylib.h>
 #include <deque>
+#include <raymath.h>
 
 using namespace std;
 
 Color Red = {230, 41, 55, 255};
 Color Green = {0, 228, 48, 255};
+Color Black = {0, 0, 0, 255};
 
 int CellSize = 30;
 int CellCount = 25;
@@ -36,6 +38,7 @@ class Snake
 {
 public:
     deque<Vector2> body = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}};
+    Vector2 direction = Vector2{1, 0};
 
     void Draw()
     {
@@ -44,6 +47,21 @@ public:
             int x = body[i].x;
             int y = body[i].y;
             DrawRectangle(x * CellSize, y * CellSize, CellSize, CellSize, Green);
+        }
+    }
+
+    void Update()
+    {
+        static float delay = 0.2f;
+        static float elapsedTime = 0.0f;
+
+        elapsedTime += GetFrameTime();
+        if (elapsedTime > delay)
+        {
+            elapsedTime -= delay;
+            body.pop_back();
+            Vector2 newHead = Vector2Add(body.front(), direction);
+            body.push_front(newHead);
         }
     }
 };
@@ -59,6 +77,8 @@ int main()
     while (WindowShouldClose() == false)
     {
         BeginDrawing();
+        snake.Update();
+        ClearBackground(Black);
         food.Draw();
         snake.Draw();
 
