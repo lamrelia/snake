@@ -145,6 +145,8 @@ public:
     void Update()
     {
         snake.Update();
+        CheckFoodEaten();
+        CheckBorderCollision();
     }
 
     void HandleInput()
@@ -160,6 +162,23 @@ public:
             snake.AddBody = true;
         }
     }
+
+    void CheckBorderCollision()
+    {
+        if (snake.body[0].x == CellCount || snake.body[0].x == -1)
+        {
+            GameOver();
+        }
+        else if (snake.body[0].y == CellCount || snake.body[0].y == -1)
+        {
+            GameOver();
+        }
+    }
+
+    void GameOver()
+    {
+        CloseWindow();
+    }
 };
 
 int main()
@@ -173,7 +192,6 @@ int main()
     {
         BeginDrawing();
         game.HandleInput();
-        game.CheckFoodEaten();
         game.Update();
         ClearBackground(Black);
         game.Draw();
