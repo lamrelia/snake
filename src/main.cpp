@@ -11,26 +11,49 @@ Color Black = {0, 0, 0, 255};
 int CellSize = 30;
 int CellCount = 25;
 
+bool ElementInDeque(Vector2 element, deque<Vector2> deque)
+{
+    for (unsigned int i = 0; i < deque.size(); i++)
+    {
+        if (Vector2Equals(deque[i], element))
+        {
+            return true;
+        }
+    }
+    return false;
+};
+
 class Food
 {
 public:
     Vector2 position;
 
-    Food()
+    Food(deque<Vector2> SnakeBody)
     {
-        position = GenerateRandomPosition();
+        position = GenerateRandomPosition(SnakeBody);
     }
 
     void Draw()
     {
-        DrawCircle(position.x * CellSize, position.y * CellSize, CellSize, Red);
+        DrawRectangle(position.x * CellSize, position.y * CellSize, CellSize, CellSize, Red);
     }
 
-    Vector2 GenerateRandomPosition()
+    Vector2 GenerateRandomCell()
     {
         float x = GetRandomValue(0, CellCount - 1);
         float y = GetRandomValue(0, CellCount - 1);
         return Vector2{x, y};
+    }
+
+    Vector2 GenerateRandomPosition(deque<Vector2> SnakeBody)
+    {
+        Vector2 position = GenerateRandomCell();
+        while (ElementInDeque(position, SnakeBody))
+        {
+            position = GenerateRandomCell();
+        }
+
+        return position;
     }
 };
 
@@ -39,6 +62,7 @@ class Snake
 public:
     deque<Vector2> body = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}};
     Vector2 direction = Vector2{1, 0};
+    bool AddBody = false;
 
     void Draw()
     {
@@ -52,16 +76,24 @@ public:
 
     void Update()
     {
-        static float delay = 0.1f;
-        static float elapsedTime = 0.0f;
-
-        elapsedTime += GetFrameTime();
-        if (elapsedTime > delay)
+        if (AddBody == true)
         {
-            elapsedTime -= delay;
-            body.pop_back();
-            Vector2 newHead = Vector2Add(body.front(), direction);
-            body.push_front(newHead);
+            body.push_front(Vector2Add(body[0], direction));
+            AddBody = false;
+        }
+        else
+        {
+            static float delay = 0.1f;
+            static float elapsedTime = 0.0f;
+
+            elapsedTime += GetFrameTime();
+            if (elapsedTime > delay)
+            {
+                elapsedTime -= delay;
+                body.pop_back();
+                Vector2 newHead = Vector2Add(body.front(), direction);
+                body.push_front(newHead);
+            }
         }
     }
 
@@ -101,7 +133,7 @@ public:
 class Game
 {
 public:
-    Food food = Food();
+    Food food = Food(snake.body);
     Snake snake = Snake();
 
     void Draw()
@@ -119,6 +151,15 @@ public:
     {
         snake.HandleInput();
     }
+
+    void CheckFoodEaten()
+    {
+        if (Vector2Equals(snake.body[0], food.position))
+        {
+            food.position = food.GenerateRandomPosition(snake.body);
+            snake.AddBody = true;
+        }
+    }
 };
 
 int main()
@@ -126,12 +167,13 @@ int main()
     InitWindow(CellSize * CellCount, CellSize * CellCount, "Snake");
     SetTargetFPS(240);
 
-    Game     game = Game();
+    Game game = Game();
 
     while (WindowShouldClose() == false)
     {
         BeginDrawing();
         game.HandleInput();
+        game.CheckFoodEaten();
         game.Update();
         ClearBackground(Black);
         game.Draw();
