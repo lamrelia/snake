@@ -98,22 +98,44 @@ public:
     }
 };
 
+class Game
+{
+public:
+    Food food = Food();
+    Snake snake = Snake();
+
+    void Draw()
+    {
+        food.Draw();
+        snake.Draw();
+    }
+
+    void Update()
+    {
+        snake.Update();
+    }
+
+    void HandleInput()
+    {
+        snake.HandleInput();
+    }
+};
+
 int main()
 {
     InitWindow(CellSize * CellCount, CellSize * CellCount, "Snake");
     SetTargetFPS(240);
 
-    Food food = Food();
-    Snake snake = Snake();
+    Game     game = Game();
 
     while (WindowShouldClose() == false)
     {
         BeginDrawing();
-        snake.HandleInput();
-        snake.Update();
+        game.HandleInput();
+        game.Update();
         ClearBackground(Black);
-        food.Draw();
-        snake.Draw();
+        game.Draw();
+        game.Draw();
 
         EndDrawing();
     }
